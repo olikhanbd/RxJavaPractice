@@ -43,7 +43,7 @@ public class ApiClient {
 
                         // Request customization: add request headers
                         Request.Builder requestBuilder = original.newBuilder()
-                                .header("Authorization", "Basic YWRtaW46MTIzNA=="); // <-- this is the important line
+                                .header("Authorization", "");
 
                         Request request = requestBuilder.build();
                         return chain.proceed(request);

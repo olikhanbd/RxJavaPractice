@@ -31,8 +31,12 @@ public class OperatorActivity extends AppCompatActivity {
 
         Observable<Task> taskObservable = Observable
                 .create((ObservableOnSubscribe<Task>) emitter -> {
+                    for (Task t : tasks) {
+                        if (!emitter.isDisposed()) {
+                            emitter.onNext(t);
+                        }
+                    }
                     if (!emitter.isDisposed()) {
-                        emitter.onNext(task);
                         emitter.onComplete();
                     }
                 })

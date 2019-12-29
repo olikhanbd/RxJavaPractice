@@ -2,8 +2,6 @@ package com.ryx.rxjavatest;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -29,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView rv;
     private PostsAdapter adapter;
-    private ProgressBar progressBar;
 
     private CompositeDisposable disposables = new CompositeDisposable();
 
@@ -38,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        progressBar = findViewById(R.id.progressbar);
         rv = findViewById(R.id.rv);
         rv.setLayoutManager(new LinearLayoutManager(this,
                 RecyclerView.VERTICAL, false));
@@ -57,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSubscribe(Disposable d) {
                 disposables.add(d);
-                progressBar.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -74,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onComplete() {
                 Log.d(TAG, "onComplete: called");
-                progressBar.setVisibility(View.GONE);
             }
         });
 
@@ -109,8 +103,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-
+                .observeOn(AndroidSchedulers.mainThread()); // added this line
     }
 
     @Override
