@@ -2,8 +2,15 @@ package com.ryx.rxjavatest;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSnapHelper;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SnapHelper;
 
 import java.util.List;
 
@@ -17,52 +24,41 @@ import io.reactivex.schedulers.Schedulers;
 public class OperatorActivity extends AppCompatActivity {
 
     private static final String TAG = "OperatorActivity";
+    private RecyclerView rv;
+    private CenterZoomAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_operator);
 
-        // create observable from single object
-        final Task task = new Task("Walk the dog", false, 3);
+        rv = findViewById(R.id.rv);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this,
+                RecyclerView.VERTICAL, false);
+        rv.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rv.getContext(),
+                RecyclerView.VERTICAL);
+        rv.addItemDecoration(dividerItemDecoration);
 
-        // create observable from list of objects
-        List<Task> tasks = DataSource.getTasks();
+        adapter = new CenterZoomAdapter(this);
+        rv.setAdapter(adapter);
 
-        Observable<Task> taskObservable = Observable
-                .create((ObservableOnSubscribe<Task>) emitter -> {
-                    for (Task t : tasks) {
-                        if (!emitter.isDisposed()) {
-                            emitter.onNext(t);
-                        }
-                    }
-                    if (!emitter.isDisposed()) {
-                        emitter.onComplete();
-                    }
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+        SnapHelper helper = new LinearSnapHelper();
+        helper.attachToRecyclerView(rv);
 
-        taskObservable.subscribe(new Observer<Task>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-
-            }
+        rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
             @Override
-            public void onNext(Task task) {
-                Log.d(TAG, "onNext: called " + task.getDescription());
-            }
-
-            @Override
-            public void onError(Throwable e) {
-
-            }
-
-            @Override
-            public void onComplete() {
-                Log.d(TAG, "onComplete: called");
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if(newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    View centerView = helper.findSnapView(layoutManager);
+                    int pos = layoutManager.getPosition(centerView);
+                    adapter.setSnapPosition(pos);
+                    Log.e("Snapped Item Position:",""+pos);
+                }
             }
         });
+
     }
 }
